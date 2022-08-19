@@ -1,9 +1,12 @@
-let display = document.querySelector('#display');
+let resultDisplay = document.querySelector('#resultDisplay');
+let operationDisplay = document.querySelector('#operationDisplay');
 let numbers = document.querySelectorAll('.number');
 let operators = document.querySelectorAll('.operator');
 let calculate = document.querySelector('.equals');
 let clearButton = document.querySelector('.clearFull');
+let undoButton = document.querySelector('.undo');
 let signChange = document.querySelector('.sign');
+let dotButton = document.querySelector('.dot');
 
 let num1 = undefined;
 let num2 = undefined;
@@ -19,48 +22,48 @@ function resetVars(keepNum1) {
 // Four available operations
 
 function add() {
-    return parseFloat(num1) + parseFloat(num2);
+    return (parseFloat(num1) + parseFloat(num2)).toFixed(2);
 }
 
 function subtract() {
-    return parseFloat(num1) - parseFloat(num2);
+    return (parseFloat(num1) - parseFloat(num2)).toFixed(2);
 }
 
 function multiply() {
-    return parseFloat(num1) * parseFloat(num2);
+    return (parseFloat(num1) * parseFloat(num2)).toFixed(2);
 }
 
 function divide() {
-    return parseFloat(num1) / parseFloat(num2);
+    return (parseFloat(num1) / parseFloat(num2)).toFixed(2);
 }
 
 function power() {
-    return parseFloat(num1) ** parseFloat(num2)
+    return (parseFloat(num1) ** parseFloat(num2)).toFixed(2);
 }
 
 // Perform operation, assign the result to num1
 
 function operate() {
     if (op == '+') {
-        display.textContent = `${add()}`;
-        num1 = add().toString();
+        resultDisplay.textContent = `${add()}`;
+        num1 = add();
     } else if (op == '-') {
-        display.textContent = `${subtract()}`;
-        num1 = subtract().toString();
+        resultDisplay.textContent = `${subtract()}`;
+        num1 = subtract();
     } else if (op == '*') {
-        display.textContent = `${multiply()}`;
-        num1 = multiply().toString();
+        resultDisplay.textContent = `${multiply()}`;
+        num1 = multiply();
     } else if (op == '/') {
         if (num2 === '0') {
-            display.textContent = 'TIAB';
+            resultDisplay.textContent = 'TIAB';
             num1 = undefined;
         } else {
-            display.textContent = `${divide()}`;
-            num1 = divide().toString();
+            resultDisplay.textContent = `${divide()}`;
+            num1 = divide();
         }
     } else if (op == '**') {
-        display.textContent = `${power()}`;
-        num1 = power().toString();
+        resultDisplay.textContent = `${power()}`;
+        num1 = power();
     }
 }
 
@@ -70,16 +73,16 @@ numbers.forEach(number => {
     number.addEventListener('click', function(event) {
         if (num1 === undefined) {
             num1 = event.target.textContent;
-            display.textContent = num1;
+            operationDisplay.textContent = num1;
         } else if (op === undefined) {
             num1 += event.target.textContent;
-            display.textContent += event.target.textContent;
+            operationDisplay.textContent += event.target.textContent;
         } else if (num2 === undefined) {
             num2 = event.target.textContent;
-            display.textContent += event.target.textContent;
+            operationDisplay.textContent += event.target.textContent;
         } else {
             num2 += event.target.textContent;
-            display.textContent += event.target.textContent;
+            operationDisplay.textContent += event.target.textContent;
         }
         console.log(num1, num2);
     })
@@ -91,8 +94,7 @@ operators.forEach(operator => {
     operator.addEventListener('click', function(event) {
         if (num1 != undefined) {
             op = event.target.textContent;
-            display.textContent += op;
-            console.log(op);
+            operationDisplay.textContent = num1 + op;
         }
     })
 });
@@ -110,7 +112,8 @@ calculate.addEventListener('click', () => {
 
 clearButton.addEventListener('click', () => {
     resetVars(false);
-    display.textContent = 'CLEARED';
+    operationDisplay.textContent = '0000'
+    resultDisplay.textContent = 'CLEARED';
 })
 
 // Listen for sign change button press
@@ -119,19 +122,60 @@ signChange.addEventListener('click', () => {
     if (num2 === undefined && num1 != undefined) {
         if (num1.includes('-')) {
             num1 = num1.substring(1);
-            display.textContent = num1;
+            operationDisplay.textContent = num1;
         } else {
             num1 = '-' + num1;
-            display.textContent = num1;
+            operationDisplay.textContent = num1;
         }
     } else {
         if (num2.includes('-')) {
             num2 = num2.substring(1);
-            display.textContent = num1 + op + num2;
+            operationDisplay.textContent = num1 + op + num2;
         } else {
             num2 = '-' + num2;
-            display.textContent = num1 + op + num2;
+            operationDisplay.textContent = num1 + op + num2;
         }
     }
 })
 
+// Listen for dot button press
+
+dotButton.addEventListener('click', () => {
+    if (num2 === undefined && num1 != undefined) {
+        if (!num1.includes('.')) {
+            num1 += '.';
+            operationDisplay.textContent = num1;
+        } 
+    } else {
+        if (!num2.includes('.')) {
+            num2 += '.';
+            operationDisplay.textContent = num1 + op + num2;
+        } 
+    }
+})
+
+// Listen for undo button press
+
+undoButton.addEventListener('click', () => {
+    if (num2 === undefined && op === undefined && num1 === undefined) {
+    } else if (num2 === undefined && op === undefined && num1 != undefined) {
+        num1 = num1.slice(0, -1);
+        if (num1 === '') {
+            num1 = undefined;
+            operationDisplay.textContent = '0000';
+        } else {
+            operationDisplay.textContent = num1;
+        }
+    } else if (num2 === undefined && op != undefined) {
+        op = undefined;
+        operationDisplay.textContent = num1;
+    } else {
+        num2 = num2.slice(0, -1);
+        if (num2 === '') {
+            num2 = undefined;
+            operationDisplay.textContent = num1 + op;
+        } else {
+            operationDisplay.textContent = num1 + op + num2;
+        }
+    }
+})
